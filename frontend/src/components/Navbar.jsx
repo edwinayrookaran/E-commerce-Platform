@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ShoppingBag,
   ChevronDown,
@@ -24,12 +25,47 @@ export default function Navbar({
                                  shopView = false,
                                  products = []
                                }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [megaOpen, setMegaOpen] = useState(false);
   const [megaTrigger, setMegaTrigger] = useState(null); // 'shop' | 'categories'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCatAccordion, setMobileCatAccordion] = useState(false);
 
   const hoverTimeoutRef = useRef(null);
+
+  function handleStoryClick(e) {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    setMegaOpen(false);
+    setMegaTrigger(null);
+
+    const scrollToStorySection = () => {
+      const el = document.getElementById('story');
+      if (el) {
+        const header = document.querySelector('.site-header');
+        const headerHeight = header ? header.offsetHeight : 70;
+        const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+
+        if (window.location.hash !== '#story') {
+          window.history.replaceState(null, '', '#story');
+        }
+      }
+    };
+
+    if (location.pathname === '/' || location.pathname === '/our-story' || location.pathname === '/story') {
+      setTimeout(scrollToStorySection, 60);
+    } else {
+      navigate('/#story', { state: { scrollTo: 'story' } });
+    }
+  }
 
   // Intentional hover handlers with debounce bridge (prevents accidental closing)
   function handleMouseEnter(triggerName) {
@@ -179,17 +215,8 @@ export default function Navbar({
 
                 <a
                     href="#story"
-                    className="nav-link"
-                    onClick={(e) => {
-                      if (currentPage !== 'home') {
-                        e.preventDefault();
-                        setCurrentPage('home');
-                        setTimeout(() => {
-                          const el = document.getElementById('story');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                      }
-                    }}
+                    className={`nav-link ${currentPage === 'story' ? 'active' : ''}`}
+                    onClick={handleStoryClick}
                 >
                   Our Story
                 </a>
@@ -380,18 +407,8 @@ export default function Navbar({
 
                       <a
                           href="#story"
-                          className="mobile-nav-link"
-                          onClick={(e) => {
-                            setMobileMenuOpen(false);
-                            if (currentPage !== 'home') {
-                              e.preventDefault();
-                              setCurrentPage('home');
-                              setTimeout(() => {
-                                const el = document.getElementById('story');
-                                if (el) el.scrollIntoView({ behavior: 'smooth' });
-                              }, 100);
-                            }
-                          }}
+                          className={`mobile-nav-link ${currentPage === 'story' ? 'active' : ''}`}
+                          onClick={handleStoryClick}
                       >
                         Our Story
                       </a>

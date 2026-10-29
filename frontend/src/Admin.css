@@ -995,6 +995,24 @@
 .pipeline-chip.delivered { background: #F0FDF4; color: #166534; }
 .pipeline-chip.cancelled { background: #FEF2F2; color: #B91C1C; }
 
+.order-detail-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .order-detail-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .order-detail-header-right {
+    width: 100%;
+  }
+}
+
 /* Dashboard Two Column */
 .admin-dashboard-two-col {
   display: grid;

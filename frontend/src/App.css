@@ -1589,6 +1589,12 @@
   z-index: 2;
 }
 
+.stepper-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .stepper-icon-circle {
   width: 44px;
   height: 44px;
@@ -2183,4 +2189,340 @@
 .order-view-details-btn:hover {
   background: #F3F4F6;
   border-color: #9CA3AF;
+}
+
+/* ==========================================================================
+   CUSTOMER ORDER CHIPS (TRACK ORDER SELECTION)
+   ========================================================================== */
+
+.customer-order-chips-wrapper {
+  margin-bottom: 22px;
+}
+
+.customer-chips-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.customer-order-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.customer-order-chip {
+  background: var(--bg-surface-cream, #FAFAF7);
+  border: 1.5px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-md, 10px);
+  padding: 10px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.customer-order-chip:hover {
+  border-color: var(--color-forest, #15803D);
+  background: #F0FDF4;
+}
+
+.customer-order-chip.active {
+  border-color: var(--color-forest, #15803D);
+  background: #ECFDF5;
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2);
+}
+
+.chip-left {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip-id {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.chip-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* ==========================================================================
+   TRACK ORDER & ORDER DETAILS MOBILE RESPONSIVE RULES (320px – 767px)
+   ========================================================================== */
+
+@media (max-width: 767px) {
+  .orders-page-container {
+    padding: 16px 12px 60px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .orders-card {
+    padding: 20px 14px;
+    border-radius: 16px;
+  }
+
+  .orders-card-header {
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .orders-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .orders-page-title,
+  .orders-title {
+    font-size: 20px;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .orders-page-sub,
+  .orders-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Guest lookup forms */
+  .orders-lookup-form {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .orders-lookup-form .lookup-input-wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .track-order-form .track-inputs-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .track-submit-btn,
+  .orders-lookup-btn {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 12px 18px;
+  }
+
+  /* Customer Order Card */
+  .customer-order-card {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+
+  .order-card-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .order-id-title {
+    font-size: 20px;
+  }
+
+  .order-card-details {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .order-detail-item {
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .order-products-summary-line {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .summary-items-pills {
+    width: 100%;
+  }
+
+  .order-item-chip {
+    word-break: break-word;
+    max-width: 100%;
+  }
+
+  /* Properly Aligned Actions on Mobile */
+  .order-card-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    padding-top: 14px;
+  }
+
+  .order-view-details-btn,
+  .order-track-btn,
+  .order-cancel-btn {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* Expanded Panel */
+  .order-card-expanded-panel {
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+
+  .expanded-items-table {
+    padding: 8px 12px;
+  }
+
+  .expanded-item-row {
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .expanded-item-name {
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .expanded-delivery-address {
+    padding: 8px 10px;
+  }
+
+  /* Tracking Results Card */
+  .track-result-card {
+    padding: 18px 14px;
+    border-radius: 14px;
+    margin-top: 20px;
+  }
+
+  .track-result-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+
+  .track-res-id {
+    font-size: 22px;
+  }
+
+  .track-res-status-wrap {
+    text-align: left;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .res-amount-label {
+    display: inline;
+    font-size: 12px;
+  }
+
+  .res-amount-val {
+    display: inline;
+    font-size: 18px;
+    margin-bottom: 0;
+  }
+
+  /* Stepper Vertical on Mobile (No Horizontal Scrolling, High Readability) */
+  .stepper-horizontal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 4px;
+  }
+
+  .stepper-node {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    padding-bottom: 22px;
+    position: relative;
+    gap: 14px;
+  }
+
+  .stepper-node:last-child {
+    padding-bottom: 0;
+  }
+
+  .stepper-icon-circle {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .stepper-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stepper-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    line-height: 1.3;
+    color: #111827;
+  }
+
+  .stepper-desc {
+    display: block;
+    font-size: 12px;
+    max-width: none;
+    line-height: 1.4;
+    color: #6B7280;
+  }
+
+  .stepper-line {
+    top: 36px;
+    left: 18px;
+    width: 2px;
+    height: calc(100% - 34px);
+    z-index: 1;
+  }
+
+  .customer-order-chips {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .carrier-status-banner {
+    padding: 12px 14px;
+  }
 }

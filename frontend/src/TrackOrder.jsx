@@ -11,8 +11,6 @@ import {
   Search,
   Phone,
   RefreshCw,
-  Calendar,
-  IndianRupee,
 } from 'lucide-react';
 
 import { apiFetch } from './api';
@@ -439,8 +437,10 @@ export default function TrackOrder({
                       <div className="stepper-icon-circle">
                         <Icon size={18} />
                       </div>
-                      <strong className="stepper-label">{stage.label}</strong>
-                      <span className="stepper-desc">{stage.desc}</span>
+                      <div className="stepper-content">
+                        <strong className="stepper-label">{stage.label}</strong>
+                        <span className="stepper-desc">{stage.desc}</span>
+                      </div>
                       {index < BASE_STAGES.length - 1 && (
                         <div className={`stepper-line ${currentStageIndex > index ? 'done' : ''}`} />
                       )}

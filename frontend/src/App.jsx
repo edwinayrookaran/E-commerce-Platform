@@ -3,10 +3,12 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { ShopProvider } from './context/ShopContext';
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [pathname]);
+    if (!hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+  }, [pathname, hash]);
   return null;
 }
 
@@ -26,6 +28,7 @@ import LoginPage from './pages/LoginPage';
 import AccountPage from './pages/AccountPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import TrackOrderPage from './pages/TrackOrderPage';
+import OurStoryPage from './pages/OurStoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Admin Pages
@@ -63,6 +66,8 @@ export default function App() {
           <Route path="/my-orders/:orderId/track" element={<TrackOrderPage />} />
           <Route path="/track-order" element={<TrackOrderPage />} />
           <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
+          <Route path="/our-story" element={<OurStoryPage />} />
+          <Route path="/story" element={<OurStoryPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 

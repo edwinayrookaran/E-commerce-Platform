@@ -134,16 +134,10 @@ export async function apiFetch(path, options = {}) {
     headers.set('Authorization', `Bearer ${auth.token}`);
   }
 
-  let response;
-  try {
-    response = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
-  } catch (err) {
-    // Ordinary network failures should never log out the customer
-    throw err;
-  }
+  let response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
 
   // Do not intercept authentication endpoints (login, register, refresh)
   const isAuthEndpoint =

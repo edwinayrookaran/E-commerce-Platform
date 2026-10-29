@@ -1,32 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import CravingCategories from '../components/CravingCategories';
 import FudcyFavourites from '../components/FudcyFavourites';
-import ProductCard from '../components/ProductCard';
 import ConvenienceSection from '../components/ConvenienceSection';
 import BrandStory from '../components/BrandStory';
 import Testimonials from '../components/Testimonials';
+import AlsoAvailableSection from '../components/AlsoAvailableSection';
 import TrustBanner from '../components/TrustBanner';
-import { CATEGORIES } from '../catalogHelper';
 import { useShop } from '../context/ShopContext';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     products,
-    loadingProducts,
-    productsError,
     cart,
     addToCart,
     setQuickViewProduct
   } = useShop();
 
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('featured');
-
+  // Scroll reveal observer for entrance animations
   useEffect(() => {
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
@@ -64,206 +58,86 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      (product.name || '').toLowerCase().includes(search.toLowerCase()) ||
-      (product.description || '').toLowerCase().includes(search.toLowerCase());
+  // Handle navigating to Our Story section smoothly from any route or direct link
+  useEffect(() => {
+    if (location.hash === '#story' || location.state?.scrollTo === 'story') {
+      const scrollToStory = (attempts = 0) => {
+        const el = document.getElementById('story');
+        if (el) {
+          const header = document.querySelector('.site-header');
+          const headerHeight = header ? header.offsetHeight : 70;
+          const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
 
-    const matchesCategory =
-      selectedCategory === 'All' ||
-      product.category === selectedCategory ||
-      (selectedCategory === 'RICE & MEALS' && product.category?.includes('RICE'));
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: attempts === 0 ? 'smooth' : 'auto',
+          });
+        } else if (attempts < 8) {
+          setTimeout(() => scrollToStory(attempts + 1), 60);
+        }
+      };
 
-    return matchesSearch && matchesCategory;
-  });
+      const timer = setTimeout(() => {
+        scrollToStory(0);
+      }, 80);
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'price-asc') return Number(a.price) - Number(b.price);
-    if (sortBy === 'price-desc') return Number(b.price) - Number(a.price);
-    if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
-    return 0;
-  });
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash, location.state]);
+
+  const handleHeroExplore = () => {
+    const el = document.getElementById('story');
+    if (el) {
+      const header = document.querySelector('.site-header');
+      const headerHeight = header ? header.offsetHeight : 70;
+      const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
       {/* Hero Banner */}
       <Hero
-        onShopClick={() => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            navigate('/shop');
-          } else {
-            const el = document.getElementById('catalogue');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }
-        }}
-        onExploreClick={() => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            navigate('/shop');
-          } else {
-            const el = document.getElementById('story');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }
-        }}
+        onShopClick={() => navigate('/shop')}
+        onExploreClick={handleHeroExplore}
         onSelectCategory={(catId) => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            navigate(`/shop?category=${encodeURIComponent(catId)}`);
-          } else {
-            setSelectedCategory(catId);
-            const el = document.getElementById('catalogue');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }
+          navigate(`/shop?category=${encodeURIComponent(catId)}`);
         }}
       />
 
       {/* Craving Categories */}
       <CravingCategories
         onSelectCategory={(catId) => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            navigate(`/shop?category=${encodeURIComponent(catId)}`);
-          } else {
-            setSelectedCategory(catId);
-            const el = document.getElementById('catalogue');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }
+          navigate(`/shop?category=${encodeURIComponent(catId)}`);
         }}
-        selectedCategory={selectedCategory}
+        selectedCategory="All"
       />
 
-      {/* Fudcy Favourites */}
+      {/* Fudcy Favourites (Top 4 Featured Showcase) */}
       <FudcyFavourites
         products={products}
         onAddToCart={addToCart}
         onQuickView={(p) => setQuickViewProduct(p)}
         cart={cart}
-        onViewAll={() => {
-          if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            navigate('/shop');
-          } else {
-            setSelectedCategory('All');
-            const el = document.getElementById('catalogue');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }
-        }}
+        onViewAll={() => navigate('/shop')}
       />
 
-      {/* Full Shopping Catalogue (Desktop/Tablet) */}
-      <section className="catalogue-section homepage-catalogue" id="catalogue">
-        <div className="section-container">
-          <div className="section-header-split">
-            <h2 className="display-title">Explore Our Full Menu</h2>
-            <p className="split-caption">
-              Cooked with authentic Kerala spices<br />and sealed for freshness.<br />No refrigeration required.
-            </p>
-          </div>
+      {/* Brand Story (Our Story Section) */}
+      <BrandStory
+        onExploreMeals={() => navigate('/shop')}
+      />
 
-          {/* Filter Toolbar */}
-          <div className="catalogue-toolbar">
-            <div className="catalogue-search-row">
-              <div className="catalog-search-box">
-                <Search size={17} />
-                <input
-                  type="search"
-                  placeholder="Search by meal name or ingredient..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+      {/* Convenience Highlights */}
+      <ConvenienceSection />
 
-              <select
-                className="catalog-sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
-              >
-                <option value="featured">Sort by: Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name">Alphabetical (A–Z)</option>
-              </select>
-            </div>
+      {/* Customer Testimonials */}
+      <Testimonials />
 
-            {/* Category Filter Pills */}
-            <div className="category-filter-pills" role="tablist">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`filter-pill ${selectedCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  role="tab"
-                  aria-selected={selectedCategory === cat.id}
-                >
-                  <span>{cat.displayName || cat.name}</span>
-                  {cat.id !== 'All' && <small> ({cat.count})</small>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          {loadingProducts && (
-            <p className="empty-catalogue-msg">Loading authentic Kerala catalogue...</p>
-          )}
-
-          {productsError && (
-            <div className="empty-catalogue-msg">
-              <p style={{ color: '#b91c1c' }}>{productsError}</p>
-            </div>
-          )}
-
-          {!loadingProducts && !productsError && (
-            <>
-              <div className="product-grid">
-                {sortedProducts.map((product) => {
-                  const cartItem = cart.find((i) => i.id === product.id);
-                  return (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={addToCart}
-                      onQuickView={(p) => setQuickViewProduct(p)}
-                      cartItem={cartItem}
-                    />
-                  );
-                })}
-              </div>
-
-              {sortedProducts.length === 0 && (
-                <div className="empty-catalogue-msg">
-                  <p>No products match your search or category filter.</p>
-                  <button
-                    type="button"
-                    className="continue-shopping-btn"
-                    onClick={() => {
-                      setSearch('');
-                      setSelectedCategory('All');
-                    }}
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
-
-      {/* Secondary Brand & Story Sections (Desktop/Tablet) */}
-      <div className="homepage-secondary-sections">
-        {/* Convenience Section */}
-        <ConvenienceSection />
-
-        {/* Brand Story */}
-        <BrandStory
-          onExploreMeals={() => {
-            const el = document.getElementById('catalogue');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-        />
-
-        {/* Testimonials */}
-        <Testimonials />
-      </div>
+      {/* Also Available On Section (Amazon, Swiggy Instamart, JioMart) */}
+      <AlsoAvailableSection />
 
       {/* Trust & Features Banner */}
       <TrustBanner onTrackOrderClick={() => navigate('/track-order')} />

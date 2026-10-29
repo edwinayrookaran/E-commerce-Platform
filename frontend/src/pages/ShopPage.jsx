@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Package } from 'lucide-react';
+import { Search, Package, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import TrustBanner from '../components/TrustBanner';
 import { CATEGORIES } from '../catalogHelper';
@@ -88,30 +88,55 @@ export default function ShopPage() {
 
           {/* Filter & Search Toolbar */}
           <div className="catalogue-toolbar">
-            <div className="catalogue-search-row">
-              <div className="catalog-search-box">
-                <Search size={17} />
-                <input
-                  type="search"
-                  placeholder="Search meals, curries, or ingredients..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  aria-label="Search meals"
-                />
-              </div>
+            <form
+              className="catalogue-search-form"
+              onSubmit={(e) => e.preventDefault()}
+              role="search"
+            >
+              <div className="catalogue-search-row">
+                <div className="catalog-search-box">
+                  <Search size={18} className="search-box-icon" aria-hidden="true" />
+                  <input
+                    type="search"
+                    placeholder="Search meals, curries, or ingredients..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    aria-label="Search meals"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      className="search-clear-btn"
+                      onClick={() => setSearch('')}
+                      aria-label="Clear search"
+                      title="Clear search"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="shop-search-btn"
+                    aria-label="Search meals"
+                  >
+                    <Search size={14} className="shop-search-btn-icon" aria-hidden="true" />
+                    <span>Search</span>
+                  </button>
+                </div>
 
-              <select
-                className="catalog-sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
-              >
-                <option value="featured">Sort by: Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name">Alphabetical (A–Z)</option>
-              </select>
-            </div>
+                <select
+                  className="catalog-sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  aria-label="Sort products"
+                >
+                  <option value="featured">Sort by: Featured</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name">Alphabetical (A–Z)</option>
+                </select>
+              </div>
+            </form>
 
             {/* Category Filter Pills */}
             <div className="category-filter-pills" role="tablist">
