@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, ShieldCheck, ShoppingCart } from 'lucide-react';
 
 export default function CartDrawer({
   isOpen,
@@ -8,7 +8,8 @@ export default function CartDrawer({
   onChangeQuantity,
   onRemoveItem,
   onClearCart,
-  onProceedToCheckout
+  onProceedToCheckout,
+  onViewCart,
 }) {
   if (!isOpen) return null;
 
@@ -129,17 +130,31 @@ export default function CartDrawer({
                 <span>Cash on Delivery available at checkout. No hidden charges.</span>
               </div>
 
-              <button
-                type="button"
-                className="cart-checkout-cta"
-                onClick={() => {
-                  onClose();
-                  onProceedToCheckout();
-                }}
-              >
-                <span>Proceed to Checkout</span>
-                <ArrowRight size={17} />
-              </button>
+              <div className="cart-drawer-dual-actions">
+                <button
+                  type="button"
+                  className="cart-view-cart-btn"
+                  onClick={() => {
+                    onClose();
+                    if (onViewCart) onViewCart();
+                  }}
+                >
+                  <ShoppingCart size={16} />
+                  <span>View Cart</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="cart-checkout-cta"
+                  onClick={() => {
+                    onClose();
+                    onProceedToCheckout();
+                  }}
+                >
+                  <span>Proceed to Checkout</span>
+                  <ArrowRight size={17} />
+                </button>
+              </div>
 
               <button
                 type="button"

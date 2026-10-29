@@ -237,12 +237,59 @@ class ApiSecurityTest {
     }
 
     @Test
-    void adminCanManageCatalogWithToken() throws Exception {
+    void customerCanManageCatalogWithToken() throws Exception {
         String adminToken = login("admin@fudcy.test", "AdminPass1");
 
         mockMvc.perform(get("/api/admin/products")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void customerWithNoOrdersGetsOkEmptyList() throws Exception {
+        String token = registerAndLogin("empty-" + UUID.randomUUID() + "@fudcy.test", "secret1");
+
+        mockMvc.perform(get("/api/orders/my-orders")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void tokenRefreshPreservesInFlightRequestsDuringGraceWindow() throws Exception {
+        String token1 = registerAndLogin("refresh-" + UUID.randomUUID() + "@fudcy.test", "secret1");
+
+        // Refresh the session
+        MvcResult refreshResult = mockMvc.perform(post("/api/auth/refresh")
+                        .header("Authorization", "Bearer " + token1))
+                .andExpect(status().isOk())
+                .andReturn();
+        String token2 = objectMapper.readTree(refreshResult.getResponse().getContentAsString()).get("token").asText();
+
+        // 1. In-flight request using token1 immediately succeeds during grace window
+        mockMvc.perform(get("/api/orders/my-orders")
+                        .header("Authorization", "Bearer " + token1))
+                .andExpect(status().isOk());
+
+        // 2. New token2 succeeds
+        mockMvc.perform(get("/api/orders/my-orders")
+                        .header("Authorization", "Bearer " + token2))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void logoutImmediatelyRevokesTokenWithoutGrace() throws Exception {
+        String token = registerAndLogin("logout-" + UUID.randomUUID() + "@fudcy.test", "secret1");
+
+        mockMvc.perform(post("/api/auth/logout")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        // Calling protected endpoint with logged-out token is immediately rejected
+        mockMvc.perform(get("/api/orders/my-orders")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
     }
 
     private String orderJson(String name, String phone) {

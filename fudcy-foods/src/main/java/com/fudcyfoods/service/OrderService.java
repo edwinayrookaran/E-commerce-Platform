@@ -23,7 +23,7 @@ public class OrderService {
     private static final int MAX_ITEMS = 40;
     private static final int MAX_QTY = 99;
     private static final Set<String> ADMIN_STATUSES = Set.of(
-            "PLACED", "CONFIRMED", "PREPARING", "SHIPPED", "DELIVERED", "CANCELLED"
+            "PLACED", "CONFIRMED", "PREPARING", "PACKED", "READY_FOR_DISPATCH", "SHIPPED", "DELIVERED", "CANCELLED"
     );
     private static final Set<String> CUSTOMER_CANCELLABLE = Set.of("PLACED", "CONFIRMED");
 
@@ -308,18 +308,7 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
         }
 
-        List<CustomerOrder> owned = new ArrayList<>(
-                orderRepository.findByCustomerIdOrderByCreatedAtDesc(actor.id())
-        );
-        if (actor.email() != null) {
-            orderRepository.findByEmailIgnoreCaseAndCustomerIdIsNullOrderByCreatedAtDesc(actor.email())
-                    .forEach(order -> {
-                        if (owned.stream().noneMatch(existing -> existing.getId().equals(order.getId()))) {
-                            owned.add(order);
-                        }
-                    });
-        }
-        owned.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        List<CustomerOrder> owned = orderRepository.findByCustomerIdOrderByCreatedAtDesc(actor.id());
         return owned.stream().map(order -> {
             Map<String, Object> m = toPublicView(order, true);
             m.put("customerName", order.getCustomerName());
@@ -435,9 +424,7 @@ public class OrderService {
         if (order.getCustomerId() != null) {
             return Objects.equals(order.getCustomerId(), actor.id());
         }
-        return actor.email() != null
-                && order.getEmail() != null
-                && actor.email().equalsIgnoreCase(order.getEmail());
+        return false;
     }
 
     private void restoreStockOnce(CustomerOrder order) {
@@ -471,11 +458,13 @@ public class OrderService {
         result.put("createdAt", order.getCreatedAt());
         result.put("totalAmount", order.getTotalAmount());
         result.put("paymentMethod", order.getPaymentMethod());
+
         if (includeItems) {
             List<Map<String, Object>> items = orderItemRepository.findByCustomerOrderId(order.getId())
                     .stream()
                     .map(item -> {
                         Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("productId", item.getProductId());
                         row.put("productName", item.getProductName());
                         row.put("quantity", item.getQuantity());
                         row.put("unitPrice", item.getUnitPrice());

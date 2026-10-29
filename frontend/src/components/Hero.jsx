@@ -63,16 +63,18 @@ export default function Hero({ onShopClick, onExploreClick, onSelectCategory }) 
             />
           </div>
 
-          <h3 className="hero-collection-title">Explore our collection</h3>
-          <p className="hero-collection-text">
-            Slow-cooked with Tellicherry black pepper, caramelised shallots &amp;
-            toasted coconut &mdash; our top pick, Kerala Buffalo Meat Roast 200g, is{' '}
-            <strong>₹232.00</strong> <del>₹290.00</del>.
-          </p>
-          <button type="button" className="hero-outline-btn" onClick={onExploreClick}>
-            <span>Explore Fudcy</span>
-            <ArrowRight size={14} />
-          </button>
+          <div className="hero-collection-info">
+            <h3 className="hero-collection-title">Explore our collection</h3>
+            <p className="hero-collection-text">
+              Slow-cooked with Tellicherry black pepper, caramelised shallots &amp;
+              toasted coconut &mdash; our top pick, Kerala Buffalo Meat Roast 200g, is{' '}
+              <strong>₹232.00</strong> <del>₹290.00</del>.
+            </p>
+            <button type="button" className="hero-outline-btn" onClick={onExploreClick}>
+              <span>Explore Fudcy</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
 

@@ -48,8 +48,9 @@ export default function FudcyFavourites({
             type="button"
             className="view-all-link-btn"
             onClick={onViewAll}
+            aria-label="View All Products"
           >
-            <span>View all ready meals</span>
+            <span>View All Products</span>
             <span className="arrow-line" aria-hidden="true" />
           </button>
         </div>

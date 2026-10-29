@@ -96,7 +96,7 @@ export default function SessionGuard({
       : null;
 
     lastActivityRef.current = Date.now();
-    lastHeartbeatRef.current = 0;
+    lastHeartbeatRef.current = Date.now();
     expiredRef.current = false;
 
     function broadcastActivity(timestamp) {
@@ -202,10 +202,18 @@ export default function SessionGuard({
       'touchstart',
     ];
 
+    function handleSessionRenewed(e) {
+      if (!mounted || expiredRef.current) return;
+      if (e.detail) {
+        callbacksRef.current.onSessionRenewed?.(e.detail);
+      }
+    }
+
     activityEvents.forEach((eventName) => {
       window.addEventListener(eventName, handleActivity, { passive: true });
     });
     window.addEventListener('fudcy:unauthorized', handleUnauthorized);
+    window.addEventListener('fudcy:session-renewed', handleSessionRenewed);
     channel?.addEventListener('message', handleChannelMessage);
 
     const intervalId = window.setInterval(tick, 1000);
@@ -216,6 +224,7 @@ export default function SessionGuard({
         window.removeEventListener(eventName, handleActivity);
       });
       window.removeEventListener('fudcy:unauthorized', handleUnauthorized);
+      window.removeEventListener('fudcy:session-renewed', handleSessionRenewed);
       channel?.removeEventListener('message', handleChannelMessage);
       window.clearInterval(intervalId);
       channel?.close();

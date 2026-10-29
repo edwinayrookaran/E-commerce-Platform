@@ -10,11 +10,12 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  RotateCcw
+  RotateCcw,
+  Package,
 } from 'lucide-react';
 import { apiFetch } from '../../api';
 
-const ALL_STATUSES = ['PLACED', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+const ALL_STATUSES = ['PLACED', 'CONFIRMED', 'PREPARING', 'PACKED', 'READY_FOR_DISPATCH', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams();

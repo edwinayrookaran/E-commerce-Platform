@@ -89,26 +89,42 @@ export default function HomePage() {
       {/* Hero Banner */}
       <Hero
         onShopClick={() => {
-          const el = document.getElementById('catalogue');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            navigate('/shop');
+          } else {
+            const el = document.getElementById('catalogue');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
         onExploreClick={() => {
-          const el = document.getElementById('story');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            navigate('/shop');
+          } else {
+            const el = document.getElementById('story');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
         onSelectCategory={(catId) => {
-          setSelectedCategory(catId);
-          const el = document.getElementById('catalogue');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            navigate(`/shop?category=${encodeURIComponent(catId)}`);
+          } else {
+            setSelectedCategory(catId);
+            const el = document.getElementById('catalogue');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
       />
 
       {/* Craving Categories */}
       <CravingCategories
         onSelectCategory={(catId) => {
-          setSelectedCategory(catId);
-          const el = document.getElementById('catalogue');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            navigate(`/shop?category=${encodeURIComponent(catId)}`);
+          } else {
+            setSelectedCategory(catId);
+            const el = document.getElementById('catalogue');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
         selectedCategory={selectedCategory}
       />
@@ -120,14 +136,18 @@ export default function HomePage() {
         onQuickView={(p) => setQuickViewProduct(p)}
         cart={cart}
         onViewAll={() => {
-          setSelectedCategory('All');
-          const el = document.getElementById('catalogue');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
+          if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            navigate('/shop');
+          } else {
+            setSelectedCategory('All');
+            const el = document.getElementById('catalogue');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }
         }}
       />
 
-      {/* Full Shopping Catalogue */}
-      <section className="catalogue-section" id="catalogue">
+      {/* Full Shopping Catalogue (Desktop/Tablet) */}
+      <section className="catalogue-section homepage-catalogue" id="catalogue">
         <div className="section-container">
           <div className="section-header-split">
             <h2 className="display-title">Explore Our Full Menu</h2>
@@ -228,19 +248,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Convenience Section */}
-      <ConvenienceSection />
+      {/* Secondary Brand & Story Sections (Desktop/Tablet) */}
+      <div className="homepage-secondary-sections">
+        {/* Convenience Section */}
+        <ConvenienceSection />
 
-      {/* Brand Story */}
-      <BrandStory
-        onExploreMeals={() => {
-          const el = document.getElementById('catalogue');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
-      />
+        {/* Brand Story */}
+        <BrandStory
+          onExploreMeals={() => {
+            const el = document.getElementById('catalogue');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
 
-      {/* Testimonials */}
-      <Testimonials />
+        {/* Testimonials */}
+        <Testimonials />
+      </div>
 
       {/* Trust & Features Banner */}
       <TrustBanner onTrackOrderClick={() => navigate('/track-order')} />

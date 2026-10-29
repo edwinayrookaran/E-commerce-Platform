@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Package,
@@ -11,33 +11,53 @@ import {
   CheckCircle2,
   Eye
 } from 'lucide-react';
-import { apiFetch } from '../../api';
+import { apiFetch, getStoredAuth } from '../../api';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const mountedRef = useRef(true);
 
-  async function loadDashboardStats() {
-    setLoading(true);
-    setError('');
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const loadDashboardStats = useCallback(async () => {
+    // Verify a valid token is stored before even attempting the request.
+    // getStoredAuth() returns null if the token is expired.
+    const auth = getStoredAuth();
+    if (!auth?.token) {
+      if (mountedRef.current) {
+        setError('Administrator session expired. Please sign in again.');
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (mountedRef.current) {
+      setLoading(true);
+      setError('');
+    }
     try {
       const res = await apiFetch('/api/admin/stats');
+      if (!mountedRef.current) return;
       if (!res.ok) {
         throw new Error(`Failed to load admin statistics (HTTP ${res.status})`);
       }
       const data = await res.json();
-      setStats(data);
+      if (mountedRef.current) setStats(data);
     } catch (err) {
-      setError(err.message || 'Could not fetch dashboard statistics');
+      if (mountedRef.current) setError(err.message || 'Could not fetch dashboard statistics');
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     loadDashboardStats();
-  }, []);
+  }, [loadDashboardStats]);
 
   if (loading) {
     return (

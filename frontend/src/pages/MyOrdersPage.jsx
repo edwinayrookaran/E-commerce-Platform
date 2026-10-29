@@ -12,10 +12,12 @@ export default function MyOrdersPage() {
       <MyOrders
         onBack={() => navigate('/')}
         onTrackOrder={(params) => {
-          const query = params?.orderId
-            ? `?orderId=${params.orderId}${params.phone ? '&phone=' + encodeURIComponent(params.phone) : ''}`
-            : '';
-          navigate(`/track-order${query}`);
+          if (params?.orderId) {
+            const query = params.phone ? `?phone=${encodeURIComponent(params.phone)}` : '';
+            navigate(`/track-order/${params.orderId}${query}`);
+          } else {
+            navigate('/track-order');
+          }
         }}
         currentUser={currentUser}
       />

@@ -58,8 +58,11 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/orders" element={<MyOrdersPage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
+          <Route path="/my-orders/:orderId/track" element={<TrackOrderPage />} />
           <Route path="/track-order" element={<TrackOrderPage />} />
+          <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 

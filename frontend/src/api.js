@@ -1,4 +1,3 @@
-
 export const API_BASE = 'http://localhost:8080';
 
 const AUTH_KEY = 'fudcy_auth';
@@ -60,6 +59,69 @@ export function clearGuestLookupStorage() {
   }
 }
 
+let refreshPromise = null;
+
+export async function doRefresh() {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const stored = getStoredAuth();
+      if (!stored?.token) return null;
+
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stored.token}`,
+        },
+      });
+
+      if (!res.ok) {
+        return null;
+      }
+
+      const payload = await res.json();
+      const token = payload?.token;
+      const user = payload?.user || payload?.customer;
+
+      if (!token || !user) {
+        return null;
+      }
+
+      const freshAuth = {
+        token,
+        expiresAt: payload.expiresAt,
+        user,
+      };
+
+      storeAuth(freshAuth);
+
+      if ('BroadcastChannel' in window) {
+        try {
+          const channel = new BroadcastChannel('fudcy-auth');
+          channel.postMessage({ type: 'renewed', auth: freshAuth });
+          channel.close();
+        } catch {}
+      }
+
+      window.dispatchEvent(
+        new CustomEvent('fudcy:session-renewed', { detail: user })
+      );
+
+      return freshAuth;
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 export async function apiFetch(path, options = {}) {
   const auth = getStoredAuth();
   const headers = new Headers(options.headers || {});
@@ -68,27 +130,46 @@ export async function apiFetch(path, options = {}) {
     headers.set('Content-Type', 'application/json');
   }
 
-  if (auth?.token) {
+  if (auth?.token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${auth.token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    // Ordinary network failures should never log out the customer
+    throw err;
+  }
 
-  // A refresh failure is handled by SessionGuard.
-  // Do not dispatch a second unauthorized event for it.
-  const isRefreshRequest = path === '/api/auth/refresh';
+  // Do not intercept authentication endpoints (login, register, refresh)
+  const isAuthEndpoint =
+    path.startsWith('/api/auth/login') ||
+    path.startsWith('/api/auth/register') ||
+    path.startsWith('/api/auth/refresh');
 
-  if (
-      response.status === 401 &&
-      auth?.token &&
-      !isRefreshRequest
-  ) {
-    window.dispatchEvent(
-        new CustomEvent('fudcy:unauthorized')
-    );
+  if (response.status === 401 && auth?.token && !isAuthEndpoint) {
+    // Attempt session renewal before declaring the session invalid
+    const freshAuth = await doRefresh();
+    if (freshAuth?.token) {
+      // Retry the original request with the renewed token
+      const retryHeaders = new Headers(options.headers || {});
+      if (options.body && !retryHeaders.has('Content-Type')) {
+        retryHeaders.set('Content-Type', 'application/json');
+      }
+      retryHeaders.set('Authorization', `Bearer ${freshAuth.token}`);
+
+      response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: retryHeaders,
+      });
+    } else {
+      // Session renewal failed — token is genuinely expired and cannot be renewed
+      window.dispatchEvent(new CustomEvent('fudcy:unauthorized'));
+    }
   }
 
   return response;

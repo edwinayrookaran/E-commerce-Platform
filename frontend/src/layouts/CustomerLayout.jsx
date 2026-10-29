@@ -48,6 +48,8 @@ export default function CustomerLayout() {
   };
 
   const handleSessionExpired = (message) => {
+    clearAuth();
+    setCurrentUser(null);
     setSessionMessage(message);
     navigate('/');
   };
@@ -61,8 +63,8 @@ export default function CustomerLayout() {
     if (path === '/cart') return 'cart';
     if (path === '/checkout') return 'checkout';
     if (path.startsWith('/order-success')) return 'order-success';
-    if (path === '/my-orders') return 'my-orders';
-    if (path === '/track-order') return 'track-order';
+    if (path.startsWith('/my-orders') || path.startsWith('/orders')) return 'my-orders';
+    if (path.startsWith('/track-order')) return 'track-order';
     if (path.startsWith('/admin')) return 'admin';
     return '';
   };
@@ -76,7 +78,7 @@ export default function CustomerLayout() {
     setCurrentPage: (page) => {
       if (page === 'home') navigate('/');
       else if (page === 'shop') navigate('/shop');
-      else if (page === 'my-orders') navigate('/my-orders');
+      else if (page === 'my-orders' || page === 'orders') navigate('/my-orders');
       else if (page === 'track-order') navigate('/track-order');
       else if (page === 'checkout') navigate('/checkout');
       else if (page === 'cart') navigate('/cart');
@@ -212,6 +214,10 @@ export default function CustomerLayout() {
         onChangeQuantity={changeQuantity}
         onRemoveItem={removeFromCart}
         onClearCart={clearCart}
+        onViewCart={() => {
+          setCartOpen(false);
+          navigate('/cart');
+        }}
         onProceedToCheckout={() => {
           setCartOpen(false);
           navigate('/checkout');

@@ -112,7 +112,8 @@ public class CustomerService {
 
     public AuthSession refreshCurrentSession() {
         AuthUser user = requireUser();
-        revokeCurrentToken();
+        // Allow in-flight requests a 30-second grace window before invalidating the rotated token
+        revokeCurrentTokenWithGrace(30);
 
         Customer customer = customerRepository.findById(user.id())
                 .orElseThrow(() -> new ResponseStatusException(
@@ -283,6 +284,10 @@ public class CustomerService {
     }
 
     private void revokeCurrentToken() {
+        revokeCurrentTokenWithGrace(0);
+    }
+
+    private void revokeCurrentTokenWithGrace(int graceSeconds) {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -293,15 +298,16 @@ public class CustomerService {
         Object details = authentication.getDetails();
 
         if (details instanceof String jti) {
-            tokenBlacklist.revoke(
-                    jti, Instant.now().plusMillis(jwtService.getExpirationMs()));
+            tokenBlacklist.revokeWithGrace(
+                    jti, Instant.now().plusMillis(jwtService.getExpirationMs()), graceSeconds);
         }
 
         if (authentication.getCredentials() instanceof String token) {
             try {
-                tokenBlacklist.revoke(
+                tokenBlacklist.revokeWithGrace(
                         jwtService.parse(token).getId(),
-                        Instant.now().plusMillis(jwtService.getExpirationMs()));
+                        Instant.now().plusMillis(jwtService.getExpirationMs()),
+                        graceSeconds);
             } catch (Exception ignored) {
                 // Token is already unusable.
             }
